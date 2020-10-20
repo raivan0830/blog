@@ -13,7 +13,7 @@ const App = () => {
       <Route component={LoginPage} path="/login" />
       <Route component={RegisterPage} path="/register" />
       <Route component={WritePage} path="/write" />
-      <Route component={PostPage} path="/@username/:postId" />
+      <Route component={PostPage} path="/@:username/:postId" />
     </>
   );
 };
