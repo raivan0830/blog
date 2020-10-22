@@ -1,11 +1,11 @@
 {
-	"folders": [
-		{
-			"path": "blog-fronted"
-		},
-		{
-			"path": "blog-backend"
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "path": "blog-backend"
+    },
+    {
+      "path": "blog-frontend"
+    }
+  ],
+  "settings": {}
 }
