@@ -75,7 +75,7 @@ const auth = handleActions(
     [REGISTER_SUCCESS]: (state, { payload: auth }) => ({
       ...state,
       authError: null,
-      auth,
+      auth: auth,
     }),
     [REGISTER_FAILURE]: (state, { payload: error }) => ({
       ...state,
