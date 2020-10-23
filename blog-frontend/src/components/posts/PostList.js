@@ -5,6 +5,7 @@ import Responsive from '../common/Responsive';
 import palette from '../../lib/styles/palettes';
 import Subinfo from '../common/Subinfo';
 import Tags from '../common/Tags';
+import { Link } from 'react-router-dom';
 
 const PostListBlock = styled(Responsive)`
   margin-top: 3rem;
@@ -36,34 +37,46 @@ const PostItemBlock = styled.div`
   }
 `;
 
-const PostItem = () => {
+const PostItem = ({ post }) => {
+  const { publishDate, user, tags, title, body, _id } = post;
+
   return (
     <PostItemBlock>
-      <h2>제목</h2>
+      <h2>
+        <Link to={`/@${user.username}/${_id}`}> {title}</Link>{' '}
+      </h2>
       <Subinfo
-        username="강지원"
-        publishDate="2020-10-20"
+        username={user.username}
+        publishDate={new Date(publishDate)}
         hasMarginTop={false}
       />
-      <Tags tags={['아이린', '장원영']} />
-      <p> 포스트 내용의 일부부.. </p>
+      <Tags tags={tags} />
+      <p> {body} </p>
     </PostItemBlock>
   );
 };
 
-const PostList = () => {
+const PostList = ({ posts, loading, error, showWriteButton }) => {
+  if (error) {
+    return <PostListBlock> 에러가 발생했습니다. </PostListBlock>;
+  }
   return (
     <PostListBlock>
       <WritePostButtonWrapper>
-        <Button cyan to="/write">
-          새글 작성하기
-        </Button>
+        {showWriteButton && (
+          <Button cyan to="/write">
+            새글 작성하기
+          </Button>
+        )}
       </WritePostButtonWrapper>
-      <div>
-        <PostItem />
-        <PostItem />
-        <PostItem />
-      </div>
+      {/* 로딩중이 아니고 , 포스트 배열이 존재할때만 보여줌 */}
+      {!loading && posts && (
+        <div>
+          {posts.map((post) => (
+            <PostItem post={post} key={post._id} />
+          ))}
+        </div>
+      )}
     </PostListBlock>
   );
 };

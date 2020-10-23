@@ -1,12 +1,37 @@
 import Post from '../../models/post';
 import mongoose from 'mongoose';
 import Joi from '@hapi/joi';
+import sanitizeHtml from 'sanitize-html';
 
 const { ObjectId } = mongoose.Types;
 
+const sanitizeOption = {
+  allowedTags: [
+    'h1',
+    'h2',
+    'b',
+    'i',
+    'u',
+    's',
+    'p',
+    'ul',
+    'ol',
+    'li',
+    'blockquote',
+    'a',
+    'img',
+  ],
+  allowedAttributes: {
+    a: ['herf', 'name', 'target'],
+    img: ['src'],
+    li: ['class'],
+  },
+  allowedSchemes: ['data', 'http'],
+};
+
 export const getPostById = async (ctx, next) => {
   const { id } = ctx.params;
-  console.log(id)
+  // console.log(id);
   if (!ObjectId.isValid(id)) {
     ctx.status = 400; // Bad Request
     return;
@@ -41,7 +66,7 @@ export const write = async (ctx) => {
   const { title, body, tags } = ctx.request.body;
   const post = new Post({
     title,
-    body,
+    body: sanitizeHtml(body, sanitizeOption),
     tags,
     user: ctx.state.user,
   });
@@ -53,6 +78,13 @@ export const write = async (ctx) => {
   }
 };
 
+const removeHtmlAndShorten = (body) => {
+  const filtered = sanitizeHtml(body, {
+    allowedTags: [],
+  });
+  return filtered.length < 200 ? filtered : `${filtered.slice(0, 200)}...`;
+};
+
 export const list = async (ctx) => {
   const page = parseInt(ctx.query.page || '1', 10);
   if (page < 1) {
@@ -60,11 +92,11 @@ export const list = async (ctx) => {
     return;
   }
 
-  const { tag, username } = ctx.query
+  const { tag, username } = ctx.query;
   const query = {
     ...(username ? { 'user.username': username } : {}),
     ...(tag ? { tags: tag } : {}),
-  }
+  };
 
   try {
     const posts = await Post.find(query)
@@ -77,7 +109,7 @@ export const list = async (ctx) => {
     ctx.set('Last-Page', Math.ceil(postCount / 10));
     ctx.body = posts.map((post) => ({
       ...post,
-      body: post.body.length < 50 ? post.body : `${post.body.slice(0, 50)}...`,
+      body: removeHtmlAndShorten(post.body),
     }));
   } catch (e) {
     ctx.throw(500, e);
@@ -108,15 +140,19 @@ export const update = async (ctx) => {
   });
 
   const result = schema.validate(ctx.request.body);
-  console.log(result);
+  // console.log(result);
   if (result.error) {
     ctx.status = 400;
     ctx.body = result.error;
     return;
   }
 
+  const nextData = { ...ctx.request.body };
+  if (nextData.body) {
+    nextData.body = sanitizeHtml(nextData.body, sanitizeOption);
+  }
   try {
-    const post = await Post.findByIdAndUpdate(id, ctx.request.body, {
+    const post = await Post.findByIdAndUpdate(id, nextData, {
       new: true,
     }).exec();
     if (!post) {
