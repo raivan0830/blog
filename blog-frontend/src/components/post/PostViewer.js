@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import palette from '../../lib/styles/palettes';
 import Subinfo from '../common/Subinfo';
 import Tags from '../common/Tags';
+import { Helmet } from 'react-helmet-async';
 
 const PostViewerBlock = styled.div`
   margin-top: 4rem;
@@ -21,9 +22,13 @@ const PostHead = styled.div`
 const PostContent = styled.div`
   font-size: 1.3125rem;
   color: ${palette.gray[8]};
+
+  img {
+    max-width: 100%;
+  }
 `;
 
-const PostViewer = ({ post, error, loading }) => {
+const PostViewer = ({ post, error, loading, actionButtons }) => {
   if (error) {
     if (error.response && error.response.status === 404) {
       return <PostViewerBlock>존재하지 않는 포스트입니다.</PostViewerBlock>;
@@ -39,6 +44,9 @@ const PostViewer = ({ post, error, loading }) => {
 
   return (
     <PostViewerBlock>
+      <Helmet>
+        <title>{title}-원영이네집</title>
+      </Helmet>
       <PostHead>
         <h1>{title}</h1>
         <Subinfo
@@ -49,6 +57,7 @@ const PostViewer = ({ post, error, loading }) => {
 
         <Tags tags={tags} />
       </PostHead>
+      {actionButtons}
       <PostContent dangerouslySetInnerHTML={{ __html: body }}></PostContent>
     </PostViewerBlock>
   );

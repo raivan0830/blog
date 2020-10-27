@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import Quill from 'quill';
-import 'quill/dist/quill.bubble.css';
+// import 'quill/dist/quill.bubble.css';
+import 'quill/dist/quill.snow.css';
 import styled from 'styled-components';
 import palette from '../../lib/styles/palettes';
 import Responsive from '../common/Responsive';
@@ -35,10 +36,11 @@ const QuillWrapper = styled.div`
 const Editor = ({ title, body, onChangeField }) => {
   const quillElement = useRef(null);
   const quillInstance = useRef(null);
+  const titleInput = useRef();
 
   useEffect(() => {
     quillInstance.current = new Quill(quillElement.current, {
-      theme: 'bubble',
+      theme: 'snow',
       placeholder: '내용을 작성하세요...',
       modules: {
         toolbar: [
@@ -58,9 +60,27 @@ const Editor = ({ title, body, onChangeField }) => {
     });
   }, [onChangeField]);
 
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    if (mounted.current) return;
+    mounted.current = true;
+    document
+      .querySelectorAll('.ql-toolbar button')
+      .forEach((b) => b.setAttribute('tabindex', -1));
+    titleInput.current.focus();
+    quillInstance.current.root.innerHTML = body;
+  }, [body]);
+
   const onChangeTitle = (e) => {
     onChangeField({ key: 'title', value: e.target.value });
   };
+
+  // useEffect(() => {
+  //   if (mounted.current) {
+  //     titleInput.current.focus();
+  //   }
+  // }, []);
 
   return (
     <EditorBlock>
@@ -68,6 +88,7 @@ const Editor = ({ title, body, onChangeField }) => {
         placeholder="제목을입력하세요"
         onChange={onChangeTitle}
         value={title}
+        ref={titleInput}
       />
       <QuillWrapper>
         <div ref={quillElement} />

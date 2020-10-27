@@ -1,14 +1,18 @@
 import React from 'react';
-import { Route } from 'react-router-dom'
+import { Route } from 'react-router-dom';
 import PostListPage from './pages/PostListPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import WritePage from './pages/WritePage';
 import PostPage from './pages/PostPage';
+import { Helmet } from 'react-helmet-async';
 
 const App = () => {
   return (
     <>
+      <Helmet>
+        <title>장원영</title>
+      </Helmet>
       <Route component={PostListPage} path={[`/@:username`, `/`]} exact />
       <Route component={LoginPage} path="/login" />
       <Route component={RegisterPage} path="/register" />
